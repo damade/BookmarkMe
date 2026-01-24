@@ -3,7 +3,7 @@ ij_kotlin_packages_to_use_import_on_demand = ""
 
 # true (recommended) / false
 insert_final_newline=true
-# identation size
+# indentation size
 indent_size=4
 # trailing commas
 ij_kotlin_allow_trailing_comma=true
