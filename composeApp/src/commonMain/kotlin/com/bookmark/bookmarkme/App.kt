@@ -17,15 +17,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import bookmarkme.composeapp.generated.resources.Res
 import bookmarkme.composeapp.generated.resources.compose_multiplatform
+import com.bookmark.bookmarkme.ui.core.foundation.BookmarkTheme
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
+    BookmarkTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
             modifier =

@@ -1,9 +1,9 @@
 [versions]
-agp = "8.11.2"
+agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
-androidx-activity = "1.12.2"
+androidx-activity = "1.12.3"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
@@ -24,7 +24,9 @@ androidx-navigation = "2.9.1"
 koin = "4.1.1"
 material-icons-core = "1.7.3"
 ktlint-gradle = "14.0.1"
-ktlint-ruleset-compose = "0.5.5"
+ktlint-ruleset-compose = "0.5.6"
+jetbrains-compose = "1.10.0"
+jetbrains-compose-material = "1.9.0-alpha04"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -40,6 +42,15 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
 androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
 material-icon-core = { group = "org.jetbrains.compose.material", name = "material-icons-core", version.ref = "material-icons-core" }
+
+# Compose
+jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "jetbrains-compose" }
+jetbrains-compose-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "jetbrains-compose" }
+jetbrains-compose-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "jetbrains-compose" }
+jetbrains-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "jetbrains-compose" }
+jetbrains-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "jetbrains-compose" }
+jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "jetbrains-compose-material" }
+jetbrains-compose-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "jetbrains-compose" }
 
 # Network - Ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
