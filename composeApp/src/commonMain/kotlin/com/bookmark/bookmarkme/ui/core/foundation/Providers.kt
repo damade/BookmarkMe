@@ -4,5 +4,5 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 internal val LocalBookmarkColors =
     staticCompositionLocalOf<BookmarkColours> {
-        error("No TrivagoColors provided.")
+        error("No BookmarkColours provided.")
     }

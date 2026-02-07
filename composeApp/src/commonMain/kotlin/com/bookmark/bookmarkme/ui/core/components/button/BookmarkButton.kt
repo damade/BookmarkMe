@@ -234,13 +234,14 @@ private fun getBorder(
     when (style) {
         Default, Critical, Borderless -> null
         Inverted ->
-            if (enabled)
+            if (enabled) {
                 BorderStroke(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.primary,
                 )
-            else
+            } else {
                 null
+            }
 
         Outlined ->
             BorderStroke(

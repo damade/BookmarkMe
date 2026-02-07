@@ -18,8 +18,10 @@ sealed interface StringHolder {
         val formatArgs: List<String>,
     ) : StringHolder
 
-    // This type allows formatArgs of mixed types of String, Doubles and StringResource only
-    // if an int that is not a valid @StringRes is passed, it will crash at runtime
+    /**
+     * This type allows formatArgs of mixed types of String, Doubles and StringResource only,
+     * Passing unsupported argument types or mismatched arguments may lead to IllegalArgumentException at runtime
+     */
     data class ParametrizedMixedResource(
         val resId: StringResource,
         val formatArgs: List<Any>,
@@ -48,6 +50,3 @@ fun StringHolder.Companion.pluralResource(
 fun String.toStringHolder(): StringHolder = StringHolder.Value(this)
 
 fun StringResource.toStringHolder(): StringHolder = StringHolder.Resource(resId = this)
-
-val StringHolder.Companion.EMPTY: StringHolder
-    get() = "".toStringHolder()

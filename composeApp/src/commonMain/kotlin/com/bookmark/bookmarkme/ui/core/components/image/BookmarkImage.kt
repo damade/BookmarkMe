@@ -29,9 +29,7 @@ fun BookmarkImage(
         onLoading = { imageOptions.onImageLoading() },
         error = imageOptions.error?.let { painterResource(resource = it) },
         onError = { imageOptions.onImageLoadError() },
-        onSuccess = {
-            imageOptions.onImageLoadSuccess()
-        },
+        onSuccess = { imageOptions.onImageLoadSuccess() },
     )
 }
 

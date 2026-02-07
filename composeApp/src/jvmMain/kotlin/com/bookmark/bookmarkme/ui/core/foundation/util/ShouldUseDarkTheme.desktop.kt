@@ -1,6 +1,11 @@
 package com.bookmark.bookmarkme.ui.core.foundation.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.awt.Toolkit
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -10,14 +15,25 @@ import javax.swing.UIManager
 @Composable
 actual fun shouldUseDarkTheme(): Boolean {
     val osName = System.getProperty("os.name", "").lowercase(Locale.getDefault())
-    return when {
-        osName.contains("mac") || osName.contains("darwin") -> shouldUseDarkThemeForMac()
-        osName.contains("win") -> shouldUseDarkThemeForWindows() // You can implement this similarly
-        else -> shouldUseDarkThemeGenericSwing() // For Linux or other OSes
-    }
+    val coroutineScope = rememberCoroutineScope()
+
+    val result =
+        produceState(initialValue = false) {
+            coroutineScope.launch {
+                value =
+                    withContext(context = Dispatchers.IO) {
+                        when {
+                            osName.contains("mac") || osName.contains("darwin") -> shouldUseDarkThemeForMac()
+                            osName.contains("win") -> shouldUseDarkThemeForWindows()
+                            else -> shouldUseDarkThemeGenericSwing() // For Linux or other OSes
+                        }
+                    }
+            }
+        }
+
+    return result.value
 }
 
-@Composable
 private fun shouldUseDarkThemeForMac(): Boolean {
     try {
         // Try system property first (less overhead)
@@ -27,7 +43,8 @@ private fun shouldUseDarkThemeForMac(): Boolean {
         }
 
         // Fallback: Execute `defaults read -g AppleInterfaceStyle`
-        val process = Runtime.getRuntime().exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
+        val process =
+            Runtime.getRuntime().exec(arrayOf("defaults", "read", "-g", "AppleInterfaceStyle"))
         val reader = BufferedReader(InputStreamReader(process.inputStream))
         val line = reader.readLine()
         val exitCode = process.waitFor() // Wait for the process to complete
@@ -43,7 +60,6 @@ private fun shouldUseDarkThemeForMac(): Boolean {
     return shouldUseDarkThemeGenericSwing()
 }
 
-@Composable
 private fun shouldUseDarkThemeForWindows(): Boolean {
     // Placeholder: Implement Windows-specific dark theme detection if needed.
     // This could involve checking registry keys (more complex, requires a library or JNA)
@@ -77,18 +93,12 @@ private fun shouldUseDarkThemeForWindows(): Boolean {
 }
 
 // Generic Swing-based heuristic as a general fallback
-@Composable
 private fun shouldUseDarkThemeGenericSwing(): Boolean =
     try {
         val defaultBackground = UIManager.getColor("Panel.background")
-        defaultBackground?.let { (it.red * 0.299 + it.green * 0.587 + it.blue * 0.114) < 128 } ?: false
+        defaultBackground?.let { (it.red * 0.299 + it.green * 0.587 + it.blue * 0.114) < 128 }
+            ?: false
     } catch (e: Exception) {
         System.err.println("Failed to detect generic Swing dark theme: ${e.message}")
         false // Default to light on error
     }
-
-// Helper function (already present in your file) [1]
-internal fun isDesktopFromApple(): Boolean {
-    val osName = System.getProperty("os.name", "").lowercase(Locale.getDefault())
-    return osName.contains("mac") || osName.contains("darwin")
-}
