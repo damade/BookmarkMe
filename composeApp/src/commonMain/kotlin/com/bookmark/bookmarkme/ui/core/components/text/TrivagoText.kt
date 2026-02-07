@@ -60,7 +60,7 @@ fun BookmarkText(
     textDecoration: TextDecoration? = null,
     maxLines: Int = Int.MAX_VALUE,
     minLines: Int = 1,
-    onTextLayout: ((TextLayoutResult) -> Unit)? = null,
+    onTextLayout: ((TextLayoutResult) -> Unit) = { },
 ) {
     Text(
         text = text,
@@ -69,7 +69,7 @@ fun BookmarkText(
         overflow = overflow,
         maxLines = maxLines,
         minLines = minLines,
-        onTextLayout = onTextLayout ?: {},
+        onTextLayout = onTextLayout,
         style = style,
         textAlign = textAlign,
         textDecoration = textDecoration,

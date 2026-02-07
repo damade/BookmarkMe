@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.jetbrains.compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.ktor.client.android)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
@@ -68,6 +69,8 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.core)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -76,7 +79,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.ktor.client.java)
             implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.kotlinx.coroutines.swing)
         }
     }
 }
