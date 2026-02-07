@@ -106,23 +106,32 @@ fun BookmarkText(
 
 private val StringHolder.value
     @Composable
-    get() = when (this) {
-        is StringHolder.Value -> value
-        is StringHolder.Resource -> stringResource(resId)
-        is StringHolder.ParametrizedResource -> stringResource(resId, *formatArgs.toTypedArray())
-        is StringHolder.ParametrizedMixedResource -> stringResource(
-            resId,
-            *formatArgs.map {
-                when (it) {
-                    is String -> it
-                    is Double -> it.toString()
-                    is StringResource -> stringResource(it)
-                    else -> throw IllegalArgumentException("Unsupported format argument type")
-                }
-            }.toTypedArray(),
-        )
-        is StringHolder.Plural -> pluralStringResource(resId, count, *formatArgs.toTypedArray())
-    }
+    get() =
+        when (this) {
+            is StringHolder.Value -> value
+            is StringHolder.Resource -> stringResource(resId)
+            is StringHolder.ParametrizedResource ->
+                stringResource(
+                    resId,
+                    *formatArgs.toTypedArray(),
+                )
+
+            is StringHolder.ParametrizedMixedResource ->
+                stringResource(
+                    resId,
+                    *formatArgs
+                        .map {
+                            when (it) {
+                                is String -> it
+                                is Double -> it.toString()
+                                is StringResource -> stringResource(it)
+                                else -> throw IllegalArgumentException("Unsupported format argument type")
+                            }
+                        }.toTypedArray(),
+                )
+
+            is StringHolder.Plural -> pluralStringResource(resId, count, *formatArgs.toTypedArray())
+        }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Preview(showBackground = true)
@@ -183,8 +192,16 @@ private fun TrivagoAnnotatedTextPreview() {
             BookmarkText(text = "#Link#: at the start".buildStyledAnnotatedString())
             BookmarkText(text = "at the end: *Bold*".buildStyledAnnotatedString())
             BookmarkText(text = "at the end: #Link#".buildStyledAnnotatedString())
-            BookmarkText(text = "Some text with *Bold1* with *Bold2* and #Link# annotations".buildStyledAnnotatedString())
-            BookmarkText(text = "Some text with *Bold1* with *Another Bold* and #Link1# with #Another Link# annotations".buildStyledAnnotatedString())
+            BookmarkText(
+                text =
+                    "Some text with *Bold1* with *Bold2* and #Link# annotations"
+                        .buildStyledAnnotatedString(),
+            )
+            BookmarkText(
+                text =
+                    "Some text with *Bold1* with *Another Bold* and #Link1# with #Another Link# annotations"
+                        .buildStyledAnnotatedString(),
+            )
             BookmarkText(text = "Some text with *#BoldAndLink#* annotation".buildStyledAnnotatedString())
             BookmarkText(text = "Some text with #*BoldAndLink*# annotation".buildStyledAnnotatedString())
             BookmarkText(text = "Some text with #*BoldAndLink#* annotation".buildStyledAnnotatedString())

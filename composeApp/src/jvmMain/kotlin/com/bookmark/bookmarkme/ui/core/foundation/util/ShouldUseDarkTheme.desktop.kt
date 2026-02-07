@@ -53,19 +53,22 @@ private fun shouldUseDarkThemeForWindows(): Boolean {
         // A common way to check is by looking at the default background color
         // of UI elements. This is a heuristic.
         val defaultBackground = UIManager.getColor("Panel.background") // For Swing L&F
-        val desktopBackground = Toolkit.getDefaultToolkit()
-            .getDesktopProperty("sun.awt.desktopBackgroundColor") // Another potential way
+        val desktopBackground =
+            Toolkit
+                .getDefaultToolkit()
+                .getDesktopProperty("sun.awt.desktopBackgroundColor") // Another potential way
 
         // Heuristic: If the background is dark, assume dark theme.
         // You might need to adjust the threshold.
         val isDefaultDark =
             defaultBackground?.let { (it.red * 0.299 + it.green * 0.587 + it.blue * 0.114) < 128 }
                 ?: false
-        val isDesktopDark = desktopBackground?.let { color ->
-            // desktopBackground can be an int (ARGB) or Color object
-            val c = color as? java.awt.Color ?: java.awt.Color(color as Int, true)
-            (c.red * 0.299 + c.green * 0.587 + c.blue * 0.114) < 128
-        } ?: false
+        val isDesktopDark =
+            desktopBackground?.let { color ->
+                // desktopBackground can be an int (ARGB) or Color object
+                val c = color as? java.awt.Color ?: java.awt.Color(color as Int, true)
+                (c.red * 0.299 + c.green * 0.587 + c.blue * 0.114) < 128
+            } ?: false
         isDefaultDark || isDesktopDark
     } catch (e: Exception) {
         System.err.println("Failed to detect Windows dark theme: ${e.message}")
@@ -75,19 +78,17 @@ private fun shouldUseDarkThemeForWindows(): Boolean {
 
 // Generic Swing-based heuristic as a general fallback
 @Composable
-private fun shouldUseDarkThemeGenericSwing(): Boolean {
-    return try {
+private fun shouldUseDarkThemeGenericSwing(): Boolean =
+    try {
         val defaultBackground = UIManager.getColor("Panel.background")
         defaultBackground?.let { (it.red * 0.299 + it.green * 0.587 + it.blue * 0.114) < 128 } ?: false
     } catch (e: Exception) {
         System.err.println("Failed to detect generic Swing dark theme: ${e.message}")
         false // Default to light on error
     }
-}
 
 // Helper function (already present in your file) [1]
 internal fun isDesktopFromApple(): Boolean {
     val osName = System.getProperty("os.name", "").lowercase(Locale.getDefault())
     return osName.contains("mac") || osName.contains("darwin")
 }
-

@@ -1,16 +1,22 @@
 package com.bookmark.bookmarkme.ui.model
 
-import androidx.annotation.PluralsRes
-import androidx.annotation.StringRes
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import kotlin.collections.toList
 
 sealed interface StringHolder {
-    data class Value(val value: String) : StringHolder
-    data class Resource(val resId: StringResource) : StringHolder
-    data class ParametrizedResource(val resId: StringResource, val formatArgs: List<String>) :
-        StringHolder
+    data class Value(
+        val value: String,
+    ) : StringHolder
+
+    data class Resource(
+        val resId: StringResource,
+    ) : StringHolder
+
+    data class ParametrizedResource(
+        val resId: StringResource,
+        val formatArgs: List<String>,
+    ) : StringHolder
 
     // This type allows formatArgs of mixed types of String, Doubles and StringResource only
     // if an int that is not a valid @StringRes is passed, it will crash at runtime
@@ -19,8 +25,11 @@ sealed interface StringHolder {
         val formatArgs: List<Any>,
     ) : StringHolder
 
-    data class Plural(val resId: PluralStringResource, val count: Int, val formatArgs: List<String>) :
-        StringHolder
+    data class Plural(
+        val resId: PluralStringResource,
+        val count: Int,
+        val formatArgs: List<String>,
+    ) : StringHolder
 
     companion object
 }

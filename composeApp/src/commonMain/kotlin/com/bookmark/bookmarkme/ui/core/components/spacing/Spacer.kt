@@ -11,16 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun BookmarkVerticalSpacer(
-    height: Dp,
-) {
+fun BookmarkVerticalSpacer(height: Dp) {
     Spacer(modifier = Modifier.height(height = height))
 }
 
 @Composable
-fun BookmarkHorizontalSpacer(
-    width: Dp,
-) {
+fun BookmarkHorizontalSpacer(width: Dp) {
     Spacer(modifier = Modifier.width(width = width))
 }
 

@@ -15,10 +15,14 @@ expect fun BookmarkTheme(
 )
 
 @Composable
-fun BookmarkPreviewTheme(
-    content: ComposableParam,
-) {
+fun BookmarkPreviewTheme(content: ComposableParam) {
     BookmarkTheme {
         Surface(content = content)
     }
+}
+
+object BookmarkTheme {
+    val colors: BookmarkColours
+        @Composable
+        get() = LocalBookmarkColors.current
 }
