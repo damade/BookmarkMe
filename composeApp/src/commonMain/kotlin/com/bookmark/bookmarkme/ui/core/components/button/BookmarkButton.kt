@@ -128,7 +128,7 @@ fun BookmarkButton(
         contentArrangement = textArrangement,
         modifier = modifier,
     ) { contentColor ->
-        if (isLoading.not()) {
+        if (!isLoading) {
             BookmarkText(
                 color = contentColor,
                 text = text,
