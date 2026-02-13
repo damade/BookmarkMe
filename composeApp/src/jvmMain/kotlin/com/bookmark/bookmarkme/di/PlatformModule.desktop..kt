@@ -9,8 +9,9 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single
 
-val platformModule: Module = module {
-    single<DesktopPlatformContext>() bind PlatformContext::class
-    single<DesktopAppInfoProvider>() bind AppInfoProvider::class
-    single<HttpClientEngine> { Java.create() }
-}
+val platformModule: Module =
+    module {
+        single<DesktopPlatformContext>() bind PlatformContext::class
+        single<DesktopAppInfoProvider>() bind AppInfoProvider::class
+        single<HttpClientEngine> { Java.create() }
+    }

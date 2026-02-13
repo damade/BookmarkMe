@@ -5,7 +5,6 @@ import com.bookmark.bookmarkme.core.model.AppEnvironment
 import com.bookmark.bookmarkme.di.platform.AppInfoProvider
 
 class DesktopAppInfoProvider : AppInfoProvider {
-
     override fun getAppVersionName(): String = DesktopBuildConfig.VERSION_NAME
 
     override fun getAppVersionCode(): Int = DesktopBuildConfig.VERSION_CODE
@@ -13,9 +12,12 @@ class DesktopAppInfoProvider : AppInfoProvider {
     override fun getAppName(): String = DesktopBuildConfig.APP_NAME
 
     override fun getAppEnvironment(): AppEnvironment {
-        val isDebug = System.getProperty("app.debug")?.toBoolean()
-            ?: java.lang.management.ManagementFactory.getRuntimeMXBean()
-                .inputArguments.any { it.contains("-agentlib:jdwp") }
+        val isDebug =
+            System.getProperty("app.debug")?.toBoolean()
+                ?: java.lang.management.ManagementFactory
+                    .getRuntimeMXBean()
+                    .inputArguments
+                    .any { it.contains("-agentlib:jdwp") }
         return if (isDebug) AppEnvironment.Staging else AppEnvironment.Production
     }
 
