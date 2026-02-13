@@ -16,11 +16,20 @@ plugins {
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.koin.compiler)
+    alias(libs.plugins.kmpgen)
 }
 
 // Optional configuration
 koinCompiler {
     userLogs = true // Log component detection
+}
+
+kmpgen {
+    spec(
+        packageName = "com.bookmark.bookmarkme.api",
+    ) {
+        specFile = file("openapi.yaml")
+    }
 }
 
 ktlint {

@@ -29,6 +29,7 @@ ktlint-ruleset-compose = "0.5.6"
 jetbrains-compose = "1.10.1"
 jetbrains-compose-material = "1.9.0-alpha04"
 coil = "3.3.0"
+kmpgen = "1.1.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -112,3 +113,4 @@ androidxRoom = { id = "androidx.room", version.ref = "androidx-room" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-gradle" }
 koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+kmpgen = { id = "com.kroegerama.openapi-kmp-gen", version.ref = "kmpgen" }
