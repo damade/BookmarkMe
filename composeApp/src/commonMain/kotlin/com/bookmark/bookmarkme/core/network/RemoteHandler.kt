@@ -10,9 +10,10 @@ suspend inline fun <reified T> HttpResponse.toDto(): T? =
     if (this.status == HttpStatusCode.OK) {
         this.body() as? T
     } else {
+        val errorBody = this.body<ErrorBody>()
         throw HttpException(
             httpStatusCode = this.status,
-            error = this.body<ErrorBody>(),
-            message = this.body<ErrorBody>().errors.firstOrNull(),
+            error = errorBody,
+            message = errorBody.errors.firstOrNull(),
         )
     }

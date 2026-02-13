@@ -191,3 +191,5 @@ val generateDesktopBuildConfig by tasks.registering {
 kotlin.sourceSets.named("jvmMain") {
     kotlin.srcDir(generateDesktopBuildConfig.map { it.outputs.files.singleFile })
 }
+
+tasks.named("compileKotlinJvm") { dependsOn(generateDesktopBuildConfig) }
