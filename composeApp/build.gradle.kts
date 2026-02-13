@@ -2,6 +2,9 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+private val appVersionName = "1.0.0"
+private val appVersionCode = 1
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -12,6 +15,12 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.koin.compiler)
+}
+
+// Optional configuration
+koinCompiler {
+    userLogs = true // Log component detection
 }
 
 ktlint {
@@ -48,7 +57,6 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.android)
             implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.koin.android)
             implementation(libs.koin.compose)
         }
         commonMain.dependencies {
@@ -68,9 +76,10 @@ kotlin {
             implementation(libs.kermit)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.navigation.compose)
-            implementation(libs.koin.core)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
+            implementation(libs.koin.core)
+            implementation(libs.koin.annotations)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -105,8 +114,8 @@ android {
             libs.versions.android.targetSdk
                 .get()
                 .toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
     packaging {
         resources {
@@ -117,6 +126,9 @@ android {
         getByName("release") {
             isMinifyEnabled = false
         }
+    }
+    buildFeatures {
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -136,7 +148,37 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.bookmark.bookmarkme"
-            packageVersion = "1.0.0"
+            packageVersion = appVersionName
         }
     }
+}
+
+// Generate BuildConfig for Desktop
+val generateDesktopBuildConfig by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/source/buildConfig/jvmMain")
+    val versionName = appVersionName
+    val versionCode = appVersionCode
+
+    outputs.dir(outputDir)
+
+    doLast {
+        val buildConfigDir = outputDir.get().asFile.resolve("com/bookmark/bookmarkme")
+        buildConfigDir.mkdirs()
+
+        buildConfigDir.resolve("DesktopBuildConfig.kt").writeText(
+            """
+            |package com.bookmark.bookmarkme
+            |
+            |object DesktopBuildConfig {
+            |    const val VERSION_NAME = "$versionName"
+            |    const val VERSION_CODE = $versionCode
+            |    const val APP_NAME = "BookmarkMe"
+            |}
+            """.trimMargin(),
+        )
+    }
+}
+
+kotlin.sourceSets.named("jvmMain") {
+    kotlin.srcDir(generateDesktopBuildConfig.map { it.outputs.files.singleFile })
 }
