@@ -11,7 +11,6 @@ val sharedModule =
                 ignoreUnknownKeys = true
                 useAlternativeNames = false
                 prettyPrint = true
-                allowTrailingComma = true
             }
         }
     }
