@@ -1,0 +1,1674 @@
+openapi: 3.1.0
+info:
+  title: Bookmark API
+  version: 2026.9.0
+  description: API for managing user bookmarks
+  contact:
+    name: Samuel Akintunde
+    email: hello@samakintunde.com
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /auth/{provider}/login:
+    get:
+      summary: OAuth Login
+      description: Initiates OAuth login with the specified provider. Returns the authorization URL to redirect the user to.
+      tags:
+        - auth
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+          description: OAuth provider (e.g., google)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthLoginResponse"
+        "400":
+          description: Invalid provider
+  /auth/{provider}/callback:
+    get:
+      summary: OAuth Callback
+      description: Handles the OAuth callback, exchanges code for token, creates or fetches user/account, sets cookie, and returns user and token.
+      tags:
+        - auth
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+          description: OAuth provider
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+          description: OAuth state parameter
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+          description: OAuth authorization code
+        - name: verifier
+          in: query
+          schema:
+            type: string
+          description: PKCE verifier for mobile OAuth
+      responses:
+        "200":
+          description: Returning user authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthCallbackResponse"
+        "201":
+          description: New user created and authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthCallbackResponse"
+        "400":
+          description: Invalid request (missing parameters, invalid provider, etc.)
+        "401":
+          description: Unauthorized (OAuth error, invalid state, etc.)
+  /auth/{provider}/token:
+    post:
+      summary: Exchange ID Token
+      description: |
+        Validates a provider ID token (e.g., from Google Sign-In or Apple Sign-In) and returns a session token.
+        This is the recommended authentication endpoint for both web and mobile clients.
+        
+        The ID token's `aud` (audience) claim must match one of the server's configured client IDs
+        for the specified provider. This prevents tokens issued for other applications from being accepted.
+        
+        For Apple Sign-In, the user's name is only provided on first authorization and must be passed
+        via the optional `user_info.name` field if available on the client.
+      tags:
+        - auth
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - google
+              - apple
+          description: OAuth provider name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExchangeTokenRequest"
+      responses:
+        "200":
+          description: Returning user authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthCallbackResponse"
+        "201":
+          description: New user created and authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthCallbackResponse"
+        "400":
+          description: Invalid request (missing provider or token)
+        "401":
+          description: Invalid or expired ID token
+  /auth/logout:
+    post:
+      summary: Logout
+      description: Logs out the authenticated user by clearing the session cookie.
+      tags:
+        - auth
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: No Content
+  /auth/refresh:
+    post:
+      summary: Refresh Access Token
+      description: |
+        Exchanges a valid refresh token for a new access token and rotated refresh token.
+        This endpoint does not require authentication (the access token may be expired).
+        The refresh token can be provided in the request body or via the bookmark_refresh cookie.
+        
+        Token rotation: the old refresh token is revoked and a new one is issued on each call.
+        If a revoked refresh token is reused, it returns 401.
+      tags:
+        - auth
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: New tokens issued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OAuthCallbackResponse"
+        "400":
+          description: No refresh token provided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+        "401":
+          description: Invalid, expired, or revoked refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+  /user/me:
+    get:
+      summary: Get Current User
+      description: Returns the authenticated user's information.
+      tags:
+        - user
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/UserResponse"
+        "500":
+          description: Internal error
+    delete:
+      summary: Delete Account
+      description: |
+        Permanently deletes the authenticated user's account and all associated data.
+        Requires re-authentication with a fresh OAuth ID token for security.
+        This action is irreversible and will delete all bookmarks, tags, digests, and settings.
+      tags:
+        - user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteAccountRequest"
+      responses:
+        "204":
+          description: Account deleted successfully
+        "400":
+          description: Validation errors or invalid provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+        "401":
+          description: Invalid or expired re-authentication token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+        "403":
+          description: Email mismatch - the token does not match the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+  /user/settings:
+    get:
+      summary: Get User Settings
+      description: Returns all settings for the authenticated user.
+      tags:
+        - settings
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SettingsResponse"
+        "500":
+          description: Internal error
+  /user/settings/{setting_key}:
+    get:
+      summary: Get User Setting
+      description: Returns a specific setting for the authenticated user.
+      tags:
+        - settings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: setting_key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Setting key name
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SettingsResponse"
+        "404":
+          description: Setting not found
+    post:
+      summary: Create User Setting
+      description: Creates or updates a setting for the authenticated user.
+      tags:
+        - settings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: setting_key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Setting key name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSettingRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SettingsResponse"
+        "400":
+          description: Invalid request body
+        "422":
+          description: Validation error
+        "500":
+          description: Internal error
+    put:
+      summary: Update User Setting
+      description: Updates a specific setting for the authenticated user.
+      tags:
+        - settings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: setting_key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Setting key name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SettingsResponse"
+        "500":
+          description: Internal error
+    delete:
+      summary: Delete User Setting
+      description: Deletes a specific setting for the authenticated user.
+      tags:
+        - settings
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: setting_key
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Setting key name
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Setting not found
+  /user/onboarding:
+    get:
+      summary: Get Onboarding Status
+      description: Returns the authenticated user's onboarding status. Always returns 200 - never returns 404, making it simpler for mobile clients.
+      tags:
+        - onboarding
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OnboardingStatusResponse"
+        "500":
+          description: Internal error
+  /user/onboarding/complete:
+    post:
+      summary: Complete Onboarding
+      description: Marks the authenticated user's onboarding as complete. Idempotent - can be called multiple times safely.
+      tags:
+        - onboarding
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/OnboardingStatusResponse"
+        "500":
+          description: Internal error
+  /bookmarks:
+    get:
+      summary: List User Bookmarks
+      description: Returns a list of bookmarks for the authenticated user. Supports full-text search across title, content, description, source, and URL fields with Google-like syntax (e.g., "exact phrase", -exclude, word1 OR word2). Bookmarks are ordered by relevance (when searching) or creation date (newest first).
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search query string. Supports full-text search with phrases, exclusions (-word), and OR operators.
+          example: golang tutorial
+        - name: tag_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter bookmarks by tag ID.
+          example: 550e8400-e29b-41d4-a716-446655440000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of bookmarks to return per page (max 100).
+          example: 10
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of bookmarks to skip (for pagination).
+          example: 0
+        - name: include
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [tags]
+          description: Related resources to include. Use `include=tags` to include tags for each bookmark. Omit for faster responses when tags are not needed.
+          example: tags
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookmarksListResponse"
+        "500":
+          description: Internal error
+    post:
+      summary: Create User Bookmark
+      description: Creates a new bookmark for the authenticated user. Content extraction happens synchronously but auto-tagging is queued asynchronously. Either `auto_tag` (AI-suggested tags) or manual `tags` can be specified, but not both.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookmarkRequest"
+      responses:
+        "201":
+          description: Created. If `auto_tag=true`, tags will be attached asynchronously.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BookmarkResponse"
+        "400":
+          description: Invalid request body or both auto_tag and manual tags specified
+        "500":
+          description: Internal error
+  /bookmarks/{bookmark_id}:
+    get:
+      summary: Get User Bookmark
+      description: Gets a bookmark by ID for the authenticated user. Tags are always included for single bookmark requests.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BookmarkResponse"
+        "400":
+          description: Invalid bookmark id (not a valid UUID)
+        "404":
+          description: Bookmark not found
+        "500":
+          description: Internal error
+    put:
+      summary: Update User Bookmark
+      description: Updates an existing bookmark by ID for the authenticated user.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBookmarkRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BookmarkResponse"
+        "400":
+          description: Invalid request body
+        "404":
+          description: Bookmark not found
+        "500":
+          description: Internal error
+    delete:
+      summary: Delete User Bookmark
+      description: Deletes a bookmark by ID for the authenticated user.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Bookmark not found
+        "500":
+          description: Internal error
+  /bookmarks/{bookmark_id}/read:
+    put:
+      summary: Mark Bookmark as Read
+      description: Marks a bookmark as read for the authenticated user.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BookmarkResponse"
+        "400":
+          description: Invalid bookmark id
+        "404":
+          description: Bookmark not found
+        "500":
+          description: Internal error
+  /bookmarks/{bookmark_id}/extract-content:
+    post:
+      summary: Extract Bookmark Content
+      description: Queues a content extraction job for a bookmark. Rate limited to 1 request per minute.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      responses:
+        "204":
+          description: Content extraction queued successfully
+        "400":
+          description: Invalid bookmark id
+        "404":
+          description: Bookmark not found
+        "425":
+          description: Too early to re-extract (cooldown period not elapsed)
+        "500":
+          description: Internal error
+  /tags:
+    get:
+      summary: List User Tags
+      description: Returns a list of tags for the authenticated user, ordered by name.
+      tags:
+        - tags
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TagResponse"
+        "500":
+          description: Internal error
+    post:
+      summary: Create Tag
+      description: Creates a new tag for the authenticated user.
+      tags:
+        - tags
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/TagResponse"
+        "400":
+          description: Invalid request body
+        "500":
+          description: Internal error
+  /tags/{tag_id}:
+    put:
+      summary: Update Tag
+      description: Updates an existing tag by ID for the authenticated user.
+      tags:
+        - tags
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tag_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the tag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTagRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/TagResponse"
+        "404":
+          description: Tag not found
+        "500":
+          description: Internal error
+    delete:
+      summary: Delete Tag
+      description: Deletes a tag by ID for the authenticated user.
+      tags:
+        - tags
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: tag_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the tag
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Tag not found
+        "500":
+          description: Internal error
+  /bookmarks/{bookmark_id}/tags:
+    get:
+      summary: Get Bookmark Tags
+      description: Returns all tags associated with a bookmark.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TagResponse"
+        "500":
+          description: Internal error
+    post:
+      summary: Add Tags to Bookmark
+      description: Adds one or more tags to a bookmark.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddTagsRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TagResponse"
+        "500":
+          description: Internal error
+    delete:
+      summary: Remove Tags from Bookmark
+      description: Removes one or more tags from a bookmark.
+      tags:
+        - bookmarks
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: bookmark_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the bookmark
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveTagsRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TagResponse"
+        "500":
+          description: Internal error
+  /digests:
+    get:
+      summary: List Digests
+      description: |
+        Returns paginated list of user's digest history, sorted by creation date (newest first).
+        Only digests whose scheduled send time has passed are returned.
+
+        To get the latest digest only, use `?limit=1`.
+      tags:
+        - digests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of digests to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: offset
+          in: query
+          description: Number of digests to skip for pagination
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DigestSummary"
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of digests
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+        "500":
+          description: Internal error
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /digests/{digest_id}:
+    get:
+      summary: Get Digest
+      description: Returns a specific digest with full bookmark snapshot details. Only accessible after the scheduled send time.
+      tags:
+        - digests
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: digest_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DigestDetail"
+        "400":
+          description: Invalid digest ID format
+        "404":
+          description: Digest not found
+        "500":
+          description: Internal error
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /digests/preferences:
+    get:
+      summary: Get Digest Preferences
+      description: |
+        Returns the user's digest delivery preferences including schedule settings.
+        Returns default preferences (disabled, Monday 9:00 UTC) if user has never configured them.
+      tags:
+        - digests
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DigestPreferences"
+        "500":
+          description: Internal error
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    patch:
+      summary: Update Digest Preferences
+      description: |
+        Updates the user's digest delivery preferences. All fields are optional;
+        only provided fields will be updated. When enabled is set to true,
+        next_digest_at is automatically calculated based on the schedule.
+      tags:
+        - digests
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDigestPreferencesRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DigestPreferences"
+        "400":
+          description: Invalid request (invalid timezone, day, hour, or minute)
+        "500":
+          description: Internal error
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /digests/unsubscribe:
+    post:
+      summary: Unsubscribe from Digest
+      description: Disables the digest feature for a user using a signed token. Does not require authentication.
+      tags:
+        - digests
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnsubscribeRequest"
+      responses:
+        "200":
+          description: Successfully unsubscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        "400":
+          description: Invalid or expired token
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+components:
+  schemas:
+    UnsubscribeRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Signed unsubscribe token sent in the email
+    BookmarkResponse:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - description
+        - content
+        - source
+        - thumbnail
+        - created_at
+        - updated_at
+        - read_at
+        - tags
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the bookmark
+        title:
+          type: string
+          description: Title of the bookmark
+        url:
+          type: string
+          format: uri
+          description: URL of the bookmark
+        description:
+          type: string
+          description: Description of the bookmark
+        content:
+          type: string
+          description: Extracted content from the bookmark
+        source:
+          type: string
+          description: Source of the bookmark (e.g., twitter, github)
+        thumbnail:
+          type: string
+          description: URL of the thumbnail image
+        created_at:
+          type: string
+          format: date-time
+          description: When the bookmark was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the bookmark was last updated
+        read_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When the bookmark was marked as read
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagResponse"
+          description: Tags associated with this bookmark. Only populated when `include=tags` is specified.
+    CreateBookmarkRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to bookmark
+          example: https://example.com/article
+        title:
+          type: string
+          maxLength: 100
+          description: Title for the bookmark
+        description:
+          type: string
+          maxLength: 1000
+          description: Description of the bookmark
+        source:
+          type: string
+          maxLength: 100
+          description: Source identifier (e.g., twitter, github)
+        auto_tag:
+          type: boolean
+          description: Enable AI auto-tagging (cannot be used with manual tags). Tags will be suggested asynchronously based on bookmark content.
+          default: false
+          example: true
+        tags:
+          type: array
+          description: Manual tag names to attach to the bookmark (cannot be used with auto_tag=true). Tags will be created if they don't exist.
+          items:
+            type: string
+            maxLength: 100
+          example: ["golang", "tutorial"]
+    UpdateBookmarkRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the bookmark
+          example: https://example.com/article
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Title of the bookmark
+        description:
+          type: string
+          maxLength: 1000
+          description: Description of the bookmark
+        source:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Source identifier
+        thumbnail:
+          type: string
+          description: URL of the thumbnail image
+    SettingsResponse:
+      type: object
+      required:
+        - id
+        - key
+        - value
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the setting
+        key:
+          type: string
+          description: Setting key name
+        value:
+          description: Setting value (can be string, number, boolean, or object)
+        created_at:
+          type: string
+          format: date-time
+          description: When the setting was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the setting was last updated
+    CreateSettingRequest:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          description: Value for the setting
+    UpdateSettingRequest:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          description: Value for the setting
+    OnboardingStatusResponse:
+      type: object
+      required:
+        - completed
+      properties:
+        completed:
+          type: boolean
+          description: Whether the user has completed onboarding
+        completed_at:
+          type: string
+          format: date-time
+          description: When onboarding was completed (only present if completed)
+        version:
+          type: integer
+          description: Onboarding version that was completed (only present if completed)
+    UserResponse:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: User's display name
+        email:
+          type: string
+          format: email
+          description: User's email address
+    OAuthLoginResponse:
+      type: object
+      required:
+        - auth_url
+      properties:
+        auth_url:
+          type: string
+          format: uri
+          description: URL to redirect user to for OAuth authentication
+    OAuthCallbackResponse:
+      type: object
+      required:
+        - token
+        - refresh_token
+        - user
+      properties:
+        token:
+          type: string
+          description: PASETO session token for authenticated requests
+        refresh_token:
+          type: string
+          description: Opaque refresh token for obtaining new access tokens
+        user:
+          $ref: "#/components/schemas/UserResponse"
+    ExchangeTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: ID token from the OAuth provider (provider-signed JWT)
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        user_info:
+          type: object
+          description: |
+            Optional user info from the client. Only used for Apple Sign-In on first 
+            authorization, where the user's name is provided client-side and not included 
+            in the ID token. Ignored for existing users.
+          properties:
+            name:
+              type: string
+              description: User's full name (Apple provides this only on first sign-in)
+              example: Sam Akintunde
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          description: Opaque refresh token received from login or a previous refresh call
+    BookmarksListResponse:
+      type: object
+      required:
+        - data
+        - meta
+        - links
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookmarkResponse"
+          description: Array of bookmark resources
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+          description: Pagination metadata
+        links:
+          $ref: "#/components/schemas/Links"
+          description: Navigation links (currently empty, reserved for future use)
+    PaginationMeta:
+      type: object
+      required:
+        - pagination
+      properties:
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+          description: Pagination information
+    Pagination:
+      type: object
+      required:
+        - current_page
+        - total_pages
+        - total_count
+        - page_size
+      properties:
+        current_page:
+          type: integer
+          description: Current page number (1-indexed)
+          example: 1
+        total_pages:
+          type: integer
+          description: Total number of pages
+          example: 5
+        total_count:
+          type: integer
+          description: Total number of bookmarks matching the query
+          example: 42
+        page_size:
+          type: integer
+          description: Number of items per page
+          example: 10
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+          description: Link to the current page
+        first:
+          type: string
+          format: uri
+          description: Link to the first page
+        last:
+          type: string
+          format: uri
+          description: Link to the last page
+        prev:
+          type: string
+          format: uri
+          description: Link to the previous page
+        next:
+          type: string
+          format: uri
+          description: Link to the next page
+      description: Navigation links (reserved for future use)
+    TagResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the tag
+        name:
+          type: string
+          description: Tag name
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tag name
+          example: programming
+    UpdateTagRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Tag name
+          example: coding
+    AddTagsRequest:
+      type: object
+      required:
+        - tag_ids
+      properties:
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of tag IDs to add to the bookmark
+    RemoveTagsRequest:
+      type: object
+      required:
+        - tag_ids
+      properties:
+        tag_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of tag IDs to remove from the bookmark
+    DigestSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: AI-generated digest title
+        excerpt:
+          type: string
+          description: AI-generated teaser paragraph
+        bookmark_count:
+          type: integer
+          description: Number of bookmarks in this digest
+        created_at:
+          type: string
+          format: date-time
+    DigestDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        excerpt:
+          type: string
+        bookmarks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DigestBookmark"
+        email_sent_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When email notification was sent
+        push_sent_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When push notification was sent
+        created_at:
+          type: string
+          format: date-time
+    DigestBookmark:
+      type: object
+      description: Snapshot of bookmark at time of digest creation
+      properties:
+        title:
+          type: string
+          description: Bookmark title (snapshot)
+        url:
+          type: string
+          description: Bookmark URL (snapshot)
+        description:
+          type: string
+          description: Bookmark description (snapshot)
+        source:
+          type: string
+          description: Bookmark source (snapshot)
+        order:
+          type: integer
+          description: Display order in digest (1-10)
+    DigestPreferences:
+      type: object
+      description: User's digest delivery schedule preferences
+      required:
+        - enabled
+        - delivery_day
+        - delivery_hour
+        - delivery_minute
+        - timezone
+      properties:
+        enabled:
+          type: boolean
+          description: Whether digest delivery is enabled
+        delivery_day:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: Day of week for delivery (0=Sunday, 1=Monday, ..., 6=Saturday)
+        delivery_hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+          description: Hour of day for delivery (0-23)
+        delivery_minute:
+          type: integer
+          minimum: 0
+          maximum: 59
+          description: Minute of hour for delivery (0-59)
+        timezone:
+          type: string
+          description: IANA timezone identifier (e.g., "America/New_York", "UTC")
+        next_digest_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Next scheduled digest time (null when disabled)
+    UpdateDigestPreferencesRequest:
+      type: object
+      description: Request to update digest preferences. All fields are optional.
+      properties:
+        enabled:
+          type: boolean
+          description: Whether digest delivery is enabled
+        delivery_day:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: Day of week for delivery (0=Sunday, 1=Monday, ..., 6=Saturday)
+        delivery_hour:
+          type: integer
+          minimum: 0
+          maximum: 23
+          description: Hour of day for delivery (0-23)
+        delivery_minute:
+          type: integer
+          minimum: 0
+          maximum: 59
+          description: Minute of hour for delivery (0-59)
+        timezone:
+          type: string
+          description: IANA timezone identifier (e.g., "America/New_York", "UTC")
+    DeleteAccountRequest:
+      type: object
+      description: Request to delete user account with re-authentication token
+      required:
+        - token
+        - provider
+      properties:
+        token:
+          type: string
+          description: Fresh OAuth ID token from the provider for re-authentication
+        provider:
+          type: string
+          enum:
+            - google
+            - apple
+          description: OAuth provider name
+    JSONAPIErrorResponse:
+      type: object
+      description: JSON API error response
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              status:
+                type: string
+                description: HTTP status code
+              title:
+                type: string
+                description: Error title
+              detail:
+                type: string
+                description: Detailed error message
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    ServiceUnavailable:
+      description: The service is currently unavailable or the feature is disabled.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "503"
+                    title:
+                      type: string
+                      example: "Service Unavailable"
+                    detail:
+                      type: string
+                      example: "This feature is currently disabled."
