@@ -14,7 +14,7 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "BookmarkMe",
         ) {
-            App()
+            BookmarkMeApp()
         }
     }
 }
