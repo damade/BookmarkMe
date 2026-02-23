@@ -25,33 +25,3 @@ fun BookmarkScaffold(
         },
     )
 }
-
-@Composable
-fun BookmarkScaffold(
-    modifier: Modifier = Modifier,
-    topBar: ComposableParam = {},
-    bottomBar: ComposableParam = {},
-    mobileContent: ComposableParam,
-    tabletContent: ComposableParam? = null,
-    desktopContent: ComposableParam? = null,
-) {
-    Scaffold(
-        modifier = modifier,
-        topBar = topBar,
-        bottomBar = bottomBar,
-        content = { innerPadding ->
-            Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
-                when (getCurrentDeviceClass()) {
-                    DeviceClass.MOBILE -> mobileContent?.invoke()
-                    DeviceClass.TABLET -> tabletContent?.invoke()
-                    DeviceClass.DESKTOP -> desktopContent?.invoke()
-
-                    else -> {
-                        // Fallback to mobile content if device class is unknown
-                        mobileContent?.invoke()
-                    }
-                }
-            }
-        },
-    )
-}
