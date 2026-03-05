@@ -10,14 +10,12 @@ import com.bookmark.bookmarkme.ui.model.DeviceClass
 @Composable
 fun ScreenAdaptiveContent(
     mobileContent: ComposableParam,
-    tabletContent: ComposableParam? = null,
-    desktopContent: ComposableParam? = null,
+    desktopAndTabletContent: ComposableParam? = null,
     deviceClass: DeviceClass = rememberDeviceClass(),
 ) {
     val content =
         when (deviceClass) {
-            DeviceClass.TABLET -> tabletContent
-            DeviceClass.DESKTOP -> desktopContent ?: tabletContent
+            DeviceClass.TABLET, DeviceClass.DESKTOP -> desktopAndTabletContent
             DeviceClass.MOBILE -> mobileContent
         }
     Box {

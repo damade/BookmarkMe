@@ -3,10 +3,12 @@
 
     <!--> Authentication -->
     <string name="login_description_one">Get Started</string>
-    <string name="login_description_two">*Never lose* a great find again.\nYour favourite content in *one place*.</string>
+    <string name="login_description_two">*Never lose* a great find again.</string>
+    <string name="login_description_three">Your favourite content in *one place*.</string>
     <string name="signin_with_apple">Continue with Apple</string>
     <string name="signin_with_google">Continue with Google</string>
-    <string name="signin_privacy_agreement">By using Bookmark, you agree to accept our *Terms of Use and Privacy Policy*.</string>
+    <string name="signin_privacy_agreement_part_one">By using Bookmark, you agree to accept our</string>
+    <string name="signin_privacy_agreement_part_two">*Terms of Use and Privacy Policy*.</string>
     <string name="signin_info">We’ll create an account for you if you do not have one.</string>
 
 </resources>

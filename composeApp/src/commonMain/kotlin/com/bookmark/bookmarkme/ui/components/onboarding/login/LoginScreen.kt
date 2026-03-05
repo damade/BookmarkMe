@@ -8,7 +8,6 @@ import com.bookmark.bookmarkme.ui.core.adaptive.ScreenAdaptiveContent
 fun LoginScreen(modifier: Modifier = Modifier) {
     ScreenAdaptiveContent(
         mobileContent = { LoginScreenMobile(modifier = modifier) },
-        tabletContent = { LoginScreenTablet(modifier = modifier) },
-        desktopContent = { LoginScreenTablet(modifier = modifier) },
+        desktopAndTabletContent = { LoginScreenTablet(modifier = modifier) },
     )
 }
