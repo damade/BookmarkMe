@@ -9,5 +9,5 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.kmpgen) apply false
+    //alias(libs.plugins.kmpgen) apply false
 }

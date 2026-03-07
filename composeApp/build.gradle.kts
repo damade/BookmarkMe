@@ -16,7 +16,7 @@ plugins {
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.koin.compiler)
-    alias(libs.plugins.kmpgen)
+    // alias(libs.plugins.kmpgen)
 }
 
 // Optional configuration
@@ -24,13 +24,13 @@ koinCompiler {
     userLogs = true // Log component detection
 }
 
-kmpgen {
-    spec(
-        packageName = "com.bookmark.bookmarkme.api",
-    ) {
-        specFile = file("openapi.yaml")
-    }
-}
+// kmpgen {
+//    spec(
+//        packageName = "com.bookmark.bookmarkme.api",
+//    ) {
+//        specFile = file("openapi.yaml")
+//    }
+// }
 
 ktlint {
     verbose.set(true)
@@ -75,6 +75,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3)
             implementation(libs.jetbrains.compose.ui)
             implementation(libs.jetbrains.compose.resources)
+            implementation(libs.jetbrains.window.size)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.material.icon.core)

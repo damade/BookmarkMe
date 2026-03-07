@@ -11,7 +11,7 @@ class BookmarkMeApplication : Application() {
         super.onCreate()
 
         initKoin(
-            platformModule
+            platformModule,
         ) {
             androidContext(androidContext = this@BookmarkMeApplication)
             androidLogger()
