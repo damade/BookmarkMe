@@ -19,16 +19,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.bookmark.bookmarkme.core.model.CallbackParam
+import com.bookmark.bookmarkme.ui.core.components.modifiers.conditional
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkPreviewTheme
 
 @Composable
 fun TextWithIcon(
     text: String,
-    onClickIcon: () -> Unit,
     modifier: Modifier = Modifier,
     leadingIcon: Painter? = null,
+    onClickLeadingIcon: CallbackParam? = null,
     trailingIcon: Painter? = null,
+    onClickTrailingIcon: CallbackParam? = null,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    textColor: Color = LocalContentColor.current,
     tint: Color = LocalContentColor.current,
     spaceSize: Dp = 8.dp,
     contentDescription: String? = null,
@@ -42,20 +46,29 @@ fun TextWithIcon(
             Icon(
                 painter = leadingIcon,
                 contentDescription = contentDescription,
-                modifier = Modifier.clickable(onClick = onClickIcon),
+                modifier =
+                    Modifier.conditional(
+                        checkNotNullValue = onClickLeadingIcon,
+                        ifNotNull = { clickable(onClick = it) },
+                    ),
                 tint = tint,
             )
         }
         BookmarkText(
             text = text,
             style = textStyle,
+            color = textColor,
             modifier = Modifier.weight(weight = 1F, fill = false),
         )
         if (trailingIcon != null) {
             Icon(
                 painter = trailingIcon,
                 contentDescription = contentDescription,
-                modifier = Modifier.clickable(onClick = onClickIcon),
+                modifier =
+                    Modifier.conditional(
+                        checkNotNullValue = onClickTrailingIcon,
+                        ifNotNull = { clickable(onClick = it) },
+                    ),
                 tint = tint,
             )
         }
@@ -70,7 +83,6 @@ private fun Preview() {
             text = "Lorem ipsum sit amet what is going on here and more text to see if it pushed icon out of view",
             leadingIcon = rememberVectorPainter(image = Icons.Filled.Call),
             trailingIcon = rememberVectorPainter(image = Icons.Filled.Add),
-            onClickIcon = {},
         )
     }
 }

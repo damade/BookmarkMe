@@ -7,7 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.bookmark.bookmarkme.ui.components.onboarding.login.LoginScreen
+import com.bookmark.bookmarkme.ui.components.login.LoginScreen
 import com.bookmark.bookmarkme.ui.core.components.scaffold.BookmarkScaffold
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkTheme
 import com.bookmark.bookmarkme.ui.navigation.onboarding.Login

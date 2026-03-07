@@ -10,5 +10,6 @@
     <string name="signin_privacy_agreement_part_one">By using Bookmark, you agree to accept our</string>
     <string name="signin_privacy_agreement_part_two">*Terms of Use and Privacy Policy*.</string>
     <string name="signin_info">We’ll create an account for you if you do not have one.</string>
+    <string name="onboarding_welcome_header">Welcome to</string>
 
 </resources>

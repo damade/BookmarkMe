@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.bookmark.bookmarkme.ui.core.components.ComposableParam
+import com.bookmark.bookmarkme.ui.core.foundation.util.shouldUseDarkTheme
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -13,8 +14,7 @@ actual fun BookmarkTheme(
     useDarkTheme: Boolean?,
     content: ComposableParam,
 ) {
-    // val isDarkTheme = useDarkTheme ?: shouldUseDarkTheme()
-    val isDarkTheme = false
+    val isDarkTheme = useDarkTheme ?: shouldUseDarkTheme()
 
     val colorScheme =
         when {

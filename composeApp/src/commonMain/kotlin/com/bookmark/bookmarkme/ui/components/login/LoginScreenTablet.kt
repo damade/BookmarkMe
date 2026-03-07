@@ -1,4 +1,4 @@
-package com.bookmark.bookmarkme.ui.components.onboarding.login
+package com.bookmark.bookmarkme.ui.components.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -10,13 +10,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import bookmarkme.composeapp.generated.resources.Res
 import bookmarkme.composeapp.generated.resources.login_illustration
-import com.bookmark.bookmarkme.ui.components.onboarding.login.shared.LoginForm
+import com.bookmark.bookmarkme.ui.components.login.shared.LoginForm
+import com.bookmark.bookmarkme.ui.components.login.shared.LoginScreenGradient
+import com.bookmark.bookmarkme.ui.components.login.shared.WelcomeSection
+import com.bookmark.bookmarkme.ui.components.login.shared.gradient1Brush
+import com.bookmark.bookmarkme.ui.components.login.shared.gradient2Brush
 import com.bookmark.bookmarkme.ui.core.components.surface.BookmarkSurface
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkPreviewTheme
 import com.bookmark.bookmarkme.ui.core.foundation.util.PreviewLightDarkTablet
@@ -24,18 +26,12 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun LoginScreenTablet(modifier: Modifier = Modifier) {
-    val gradientBrush =
-        Brush.verticalGradient(
-            colorStops =
-                arrayOf(
-                    0.0f to Color(0x00070917), // top — rgba(7,9,23,0)
-                    0.5f to Color(0xBF245A8D), // middle — rgba(36,90,141,0.75)
-                    1.0f to Color(0xFF377CED), // bottom — rgba(55,124,237,1)
-                ),
+    BookmarkSurface(modifier = modifier, containerColor = MaterialTheme.colorScheme.onSurface) {
+        LoginScreenGradient(
+            firstGradient = gradient1Brush,
+            secondGradient = gradient2Brush,
         )
-
-    BookmarkSurface(containerColor = MaterialTheme.colorScheme.onSurface) {
-        Row(modifier = modifier.padding(all = 16.dp)) {
+        Row {
             Box(
                 modifier = Modifier.weight(weight = 1f),
                 contentAlignment = Alignment.Center,
@@ -50,7 +46,11 @@ internal fun LoginScreenTablet(modifier: Modifier = Modifier) {
                 )
             }
 
-            Column(modifier = Modifier.weight(weight = 1f)) {
+            Column(
+                modifier = Modifier.weight(weight = 1f).padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                WelcomeSection(modifier = Modifier.padding(vertical = 32.dp))
                 LoginForm(
                     modifier = Modifier.weight(weight = 1f),
                     signInWithGoogle = { /* Handle Google Sign-In */ },
@@ -59,11 +59,6 @@ internal fun LoginScreenTablet(modifier: Modifier = Modifier) {
             }
         }
     }
-//    Box(
-//        modifier = modifier
-//            .fillMaxSize()
-//            .background(brush = gradientBrush),
-//    )
 }
 
 @Composable

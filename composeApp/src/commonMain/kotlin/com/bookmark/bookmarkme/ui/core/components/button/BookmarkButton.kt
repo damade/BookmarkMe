@@ -22,13 +22,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bookmark.bookmarkme.extensions.forEach
+import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Apple
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Borderless
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Critical
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Default
+import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Google
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Inverted
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.Outlined
 import com.bookmark.bookmarkme.ui.core.components.button.BookmarkButtonStyle.OutlinedBlack
@@ -38,6 +39,7 @@ import com.bookmark.bookmarkme.ui.core.components.surface.BookmarkSurface
 import com.bookmark.bookmarkme.ui.core.components.text.BookmarkText
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkPreviewTheme
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkTheme
+import com.bookmark.bookmarkme.ui.core.foundation.util.PreviewLightDarkMobile
 
 enum class BookmarkButtonStyle {
     Default,
@@ -47,6 +49,8 @@ enum class BookmarkButtonStyle {
     OutlinedBlack,
     Borderless,
     Critical,
+    Apple,
+    Google,
 }
 
 @Composable
@@ -175,6 +179,10 @@ private fun getBackgroundColor(
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             }
+
+        Apple -> MaterialTheme.colorScheme.onPrimary
+
+        Google -> MaterialTheme.colorScheme.primary
     }
 
 @Composable
@@ -183,7 +191,7 @@ private fun getContentColor(
     enabled: Boolean,
 ): Color =
     when (style) {
-        Default ->
+        Default, Google ->
             if (enabled) {
                 MaterialTheme.colorScheme.onPrimary
             } else {
@@ -204,7 +212,7 @@ private fun getContentColor(
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             }
 
-        OutlinedNeutral, OutlinedBlack ->
+        OutlinedNeutral, OutlinedBlack, Apple ->
             if (enabled) {
                 MaterialTheme.colorScheme.onSurface
             } else {
@@ -232,7 +240,7 @@ private fun getBorder(
     enabled: Boolean,
 ): BorderStroke? =
     when (style) {
-        Default, Critical, Borderless -> null
+        Default, Critical, Borderless, Google, Apple -> null
         Inverted ->
             if (enabled) {
                 BorderStroke(
@@ -277,7 +285,7 @@ private fun getBorder(
             )
     }
 
-@Preview(showBackground = true)
+@PreviewLightDarkMobile
 @Composable
 private fun BookmarkButtonPreview() {
     BookmarkPreviewTheme {
