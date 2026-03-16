@@ -1,5 +1,6 @@
 package com.bookmark.bookmarkme.di
 
+import com.bookmark.bookmarkme.di.coroutine.coroutinesModule
 import com.bookmark.bookmarkme.di.network.networkModule
 import com.bookmark.bookmarkme.di.shared.sharedModule
 import org.koin.core.KoinApplication
@@ -17,6 +18,7 @@ fun initKoin(
         modules(
             sharedModule,
             networkModule,
+            coroutinesModule,
             *platformModules,
         )
     }
