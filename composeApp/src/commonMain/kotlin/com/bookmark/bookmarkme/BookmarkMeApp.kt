@@ -12,6 +12,7 @@ import com.bookmark.bookmarkme.ui.core.components.scaffold.BookmarkScaffold
 import com.bookmark.bookmarkme.ui.core.foundation.BookmarkTheme
 import com.bookmark.bookmarkme.ui.navigation.onboarding.Login
 import com.bookmark.bookmarkme.ui.navigation.onboarding.onboardingNavigation
+import com.bookmark.bookmarkme.ui.navigation.splash.Splash
 
 @Composable
 fun BookmarkMeApp(navController: NavHostController = rememberNavController()) {
