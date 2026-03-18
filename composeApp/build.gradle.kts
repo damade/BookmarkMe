@@ -67,6 +67,9 @@ kotlin {
             implementation(libs.ktor.client.android)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.koin.compose)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.services.auth)
+            implementation(libs.googleid)
         }
         commonMain.dependencies {
             implementation(libs.jetbrains.compose.runtime)
@@ -82,13 +85,15 @@ kotlin {
             implementation(libs.bundles.ktor.common)
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.core)
+            implementation(libs.multiplatform.settings.coroutines)
             implementation(libs.kermit)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
             implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.annotations)
         }
         commonTest.dependencies {

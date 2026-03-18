@@ -1,5 +1,6 @@
 package com.bookmark.bookmarkme.di.network
 
+import com.bookmark.bookmarkme.data.remotesource.api.onboarding.OnboardingApi
 import com.bookmark.bookmarkme.di.platform.AppInfoProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
@@ -14,12 +15,14 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
+import org.koin.plugin.module.dsl.single
 
 val networkModule =
     module {
         single {
             createHttpClient(httpClientEngine = get(), json = get(), appInfoProvider = get())
         }
+        single<OnboardingApi>()
     }
 
 fun createHttpClient(

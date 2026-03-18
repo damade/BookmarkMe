@@ -1,4 +1,4 @@
-package com.bookmark.bookmarkme.ui.navigation.onboarding
+package com.bookmark.bookmarkme.ui.navigation.login
 
 import kotlinx.serialization.Serializable
 
