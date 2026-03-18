@@ -22,15 +22,15 @@ class SplashViewmodel(
             val isFirstLaunch = onboardingRepository.isOnboardingCompleted()
             val isLoggedIn = preferences.accountDetails.get() is AccountState.LoggedIn
             if (!isLoggedIn) {
-                emit(SplashNavigationState.Login)
+                emit(value = SplashNavigationState.Login)
             } else if (isFirstLaunch) {
-                emit(SplashNavigationState.Onboarding)
+                emit(value = SplashNavigationState.Onboarding)
             } else {
-                emit(SplashNavigationState.Home)
+                emit(value = SplashNavigationState.Home)
             }
         }.stateIn(
             viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
             initialValue = SplashNavigationState.None,
         )
 }

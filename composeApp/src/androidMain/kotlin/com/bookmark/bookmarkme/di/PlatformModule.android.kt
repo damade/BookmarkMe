@@ -4,6 +4,8 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import com.bookmark.bookmarkme.di.platform.AppInfoProvider
 import com.bookmark.bookmarkme.di.platform.PlatformContext
+import com.bookmark.bookmarkme.services.auth.AndroidLoginService
+import com.bookmark.bookmarkme.services.auth.LoginService
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.SharedPreferencesSettings
 import io.ktor.client.engine.HttpClientEngine
@@ -17,9 +19,11 @@ val platformModule: Module =
     module {
         single<PlatformContext> { AndroidPlatformContext(context = get()) }
         single<AndroidAppInfoProvider>() bind AppInfoProvider::class
+        single<AndroidLoginService>() bind LoginService::class
         single<HttpClientEngine> { OkHttp.create() }
         single<SharedPreferences> {
             PreferenceManager.getDefaultSharedPreferences(get())
         }
         single<ObservableSettings> { SharedPreferencesSettings(delegate = get()) }
+//        factory { create(androidContext()) } bind CredentialManager::class
     }

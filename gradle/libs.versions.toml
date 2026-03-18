@@ -3,34 +3,36 @@ agp = "8.13.2"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
-androidx-activity = "1.12.4"
+androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
-androidx-core = "1.17.0"
+androidx-core = "1.18.0"
 androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.9.6"
 androidx-testExt = "1.3.0"
 composeHotReload = "1.0.0"
-composeMultiplatform = "1.10.1"
+composeMultiplatform = "1.10.2"
 junit = "4.13.2"
 kotlin = "2.3.20-Beta2"
-ktor = "3.4.0"
+ktor = "3.4.1"
 coroutines = "1.10.2"
 multiplatformSettings = "1.3.0"
-kermit = "2.0.8"
+kermit = "2.1.0"
 androidx-room = "2.8.4"
 ksp = "2.3.5"
 kotlinxSerialization = "1.10.0"
 androidx-navigation = "2.9.2"
 koin = "4.2.0-RC1"
-koin-plugin = "0.3.0"
+koin-plugin = "0.4.1"
 material-icons-core = "1.7.3"
 ktlint-gradle = "14.0.1"
 ktlint-ruleset-compose = "0.5.6"
-jetbrains-compose = "1.10.1"
+jetbrains-compose = "1.10.2"
 jetbrains-compose-material = "1.9.0-alpha04"
 jetbrains-compose-adaptive = "1.2.0"
-coil = "3.3.0"
-kmpgen = "1.1.0"
+coil = "3.4.0"
+kmpgen = "1.2.0"
+credentials = "1.5.0"
+googleid = "1.2.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -45,6 +47,11 @@ androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecyc
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 androidx-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "androidx-navigation" }
 material-icon-core = { group = "org.jetbrains.compose.material", name = "material-icons-core", version.ref = "material-icons-core" }
+
+# Google Sign-in
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 # Compose
 jetbrains-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "jetbrains-compose" }

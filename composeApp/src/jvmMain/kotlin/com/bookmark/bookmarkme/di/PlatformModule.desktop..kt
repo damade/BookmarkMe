@@ -10,6 +10,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.plugin.module.dsl.single
+import java.util.prefs.Preferences
 
 val platformModule: Module =
     module {
@@ -17,4 +18,5 @@ val platformModule: Module =
         single<DesktopAppInfoProvider>() bind AppInfoProvider::class
         single<HttpClientEngine> { Java.create() }
         single<ObservableSettings> { PreferencesSettings(delegate = get()) }
+        single<Preferences> { Preferences.userRoot().node("app.bookmarkme") }
     }
