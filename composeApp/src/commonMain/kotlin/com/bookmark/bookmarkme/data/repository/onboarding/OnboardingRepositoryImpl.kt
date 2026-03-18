@@ -9,9 +9,5 @@ internal class OnboardingRepositoryImpl(
     private val preferences: BookmarkPreferences,
     private val onboardingApi: OnboardingApi,
 ) : OnboardingRepository {
-
-    override suspend fun isOnboardingCompleted(): Boolean =
-        !preferences.isFirstLaunch.get()
-
-
+    override suspend fun isOnboardingCompleted(): Boolean = !preferences.isFirstLaunch.get()
 }

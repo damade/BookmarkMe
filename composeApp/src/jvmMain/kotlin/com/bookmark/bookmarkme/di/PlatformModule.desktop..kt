@@ -16,5 +16,5 @@ val platformModule: Module =
         single<DesktopPlatformContext>() bind PlatformContext::class
         single<DesktopAppInfoProvider>() bind AppInfoProvider::class
         single<HttpClientEngine> { Java.create() }
-        single<ObservableSettings>{ PreferencesSettings(delegate = get()) }
+        single<ObservableSettings> { PreferencesSettings(delegate = get()) }
     }

@@ -16,23 +16,21 @@ class SplashViewmodel(
     private val onboardingRepository: OnboardingRepository,
     private val preferences: BookmarkPreferences,
 ) : ViewModel() {
-
-    val navigationState = flow {
-        delay(2.seconds)
-        val isFirstLaunch = onboardingRepository.isOnboardingCompleted()
-        val isLoggedIn = preferences.accountDetails.get() is AccountState.LoggedIn
-        if (isFirstLaunch) {
-            emit(SplashNavigationState.Onboarding)
-        } else if (!isLoggedIn) {
-            emit(SplashNavigationState.Login)
-        } else {
-            emit(SplashNavigationState.Home)
-        }
-    }.stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = SplashNavigationState.None,
-    )
-
-
+    val navigationState =
+        flow {
+            delay(2.seconds)
+            val isFirstLaunch = onboardingRepository.isOnboardingCompleted()
+            val isLoggedIn = preferences.accountDetails.get() is AccountState.LoggedIn
+            if (!isLoggedIn) {
+                emit(SplashNavigationState.Login)
+            } else if (isFirstLaunch) {
+                emit(SplashNavigationState.Onboarding)
+            } else {
+                emit(SplashNavigationState.Home)
+            }
+        }.stateIn(
+            viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = SplashNavigationState.None,
+        )
 }

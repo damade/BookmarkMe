@@ -22,5 +22,4 @@ val platformModule: Module =
             PreferenceManager.getDefaultSharedPreferences(get())
         }
         single<ObservableSettings> { SharedPreferencesSettings(delegate = get()) }
-
     }

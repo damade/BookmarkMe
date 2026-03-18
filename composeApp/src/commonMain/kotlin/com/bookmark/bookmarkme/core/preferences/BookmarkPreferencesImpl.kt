@@ -135,10 +135,11 @@ class BookmarkPreferencesImpl(
             else -> AccountState.LoggedOut
         }
 
-    private fun fromAccountStateToStoredValue(details: AccountState): String = when (details) {
-        is AccountState.LoggedIn -> "logged_in:${details.details.id}:${details.details.name}:${details.details.email}"
-        is AccountState.LoggedOut -> "logged_out"
-    }
+    private fun fromAccountStateToStoredValue(details: AccountState): String =
+        when (details) {
+            is AccountState.LoggedIn -> "logged_in:${details.details.id}:${details.details.name}:${details.details.email}"
+            is AccountState.LoggedOut -> "logged_out"
+        }
 }
 
 internal const val KEY_THEME = "pref_theme"
