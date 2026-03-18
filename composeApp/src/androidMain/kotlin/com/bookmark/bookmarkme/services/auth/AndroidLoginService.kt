@@ -13,7 +13,7 @@ import com.bookmark.bookmarkme.extensions.runCatchingResult
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
-internal class AndroidLoginService(
+class AndroidLoginService(
     private val credentialManager: CredentialManager,
 ) : LoginService {
     override suspend fun loginWithGoogle(context: AppScreenContext): Output<GoogleAccountResponse> =

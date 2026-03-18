@@ -2,6 +2,7 @@ package com.bookmark.bookmarkme.di
 
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import androidx.credentials.CredentialManager
 import com.bookmark.bookmarkme.di.platform.AppInfoProvider
 import com.bookmark.bookmarkme.di.platform.PlatformContext
 import com.bookmark.bookmarkme.services.auth.AndroidLoginService
@@ -25,5 +26,5 @@ val platformModule: Module =
             PreferenceManager.getDefaultSharedPreferences(get())
         }
         single<ObservableSettings> { SharedPreferencesSettings(delegate = get()) }
-//        factory { create(androidContext()) } bind CredentialManager::class
+        single<CredentialManager> { CredentialManager.create(context = get()) }
     }
